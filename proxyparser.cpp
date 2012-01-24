@@ -160,7 +160,44 @@ bool ProxyParser::testDomainForBypass(string domain, string bypass)
 	return false;
 }
 
+bool ProxyParser::testIpForBypass(string ip, string bypass)
+{
+	if(!isDomain(bypass))
+	{
+		if(ip == bypass)
+			return true;
+
+		size_t token, iptoken, precedent_token = 0,  precedent_iptoken = 0;
+		token = bypass.find(".");
+		iptoken = ip.find(".");
+
+		while(token != string::npos)
+		{
+			string bypassnum = bypass.substr(precedent_token, token-precedent_token);
+			string ipnum = ip.substr(precedent_iptoken, iptoken-precedent_iptoken);
+
+			cout << ipnum << " ?= " << bypassnum << endl;
+			if(!(bypassnum == ipnum || bypassnum == "*"))
+				return false;
+
+			precedent_token = token+1;
+			precedent_iptoken = iptoken+1;
+			token = bypass.find(".", precedent_token);
+			iptoken = ip.find(".", precedent_iptoken);
+
+		}
+		string bypassnum = bypass.substr(precedent_token, token-precedent_token);
+		string ipnum = ip.substr(precedent_iptoken, iptoken-precedent_iptoken);
+		if(bypassnum == ipnum || bypassnum == "*")
+			return true;
+
+	}
+	return false;
+}
+
 bool ProxyParser::isDomain(string host)
 {
-	return (isalpha(host.at(0)) || host.at(0) == '*' || host == "<local>");
+	return (isalpha(host.at(0)) 
+		|| (host.at(0) == '*' && host.at(1) == '.' && isalpha(host.at(2)))
+		|| host == "<local>");
 }
