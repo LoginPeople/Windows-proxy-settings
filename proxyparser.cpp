@@ -78,5 +78,25 @@ ProxyParser::~ProxyParser(void)
 
 void ProxyParser::getStaticProxySettingForUrl(string url, wstring proxylist, wstring proxybypass, ProxySetting & proxy)
 {
+	URL_COMPONENTS components = {0};
+	components.dwStructSize = sizeof(URL_COMPONENTS);
+	wchar_t scheme[20] = {0};
+	wchar_t domain[MAX_PATH] = {0};
+	components.lpszScheme = scheme;
+	components.dwSchemeLength = 20;
+	components.lpszHostName = domain;
+	components.dwHostNameLength = MAX_PATH;
 
+	wstring wurl(url.begin(), url.end());
+
+	WinHttpCrackUrl( wurl.c_str(), (DWORD)wurl.length(), 0, &components);
+
+	wstring whost(domain);
+	string host(whost.begin(), whost.end());
+	testDomainForBypassList(host, proxybypass);
+}
+
+bool ProxyParser::testDomainForBypassList(string domain, wstring wproxybypass)
+{
+	return false;
 }

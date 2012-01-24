@@ -18,4 +18,5 @@ public:
 	~ProxyParser(void);
 
 	static void getStaticProxySettingForUrl(string url, wstring proxylist, wstring proxybypass, ProxySetting & proxy);
+	static bool testDomainForBypassList(string domain, wstring wproxybypass);
 };
