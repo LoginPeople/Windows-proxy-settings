@@ -93,10 +93,33 @@ void ProxyParser::getStaticProxySettingForUrl(string url, wstring proxylist, wst
 
 	wstring whost(domain);
 	string host(whost.begin(), whost.end());
-	testDomainForBypassList(host, proxybypass);
+	//FIXME
+	testHostForBypassList(host, proxybypass);
 }
 
-bool ProxyParser::testDomainForBypassList(string domain, wstring wproxybypass)
+bool ProxyParser::testHostForBypassList(string host, wstring wproxybypass)
+{
+	string proxybypass(wproxybypass.begin(), wproxybypass.end());
+	size_t token, precedent_token = 0;
+	token = proxybypass.find(";");
+	
+	while(token != string::npos)
+	{
+		string bypass = proxybypass.substr(precedent_token, token-precedent_token);
+
+		if(testHostForBypass(host, bypass))
+			return true;
+
+		precedent_token = token+1;
+		token = proxybypass.find(";", precedent_token);
+
+	}
+
+	string bypass = proxybypass.substr(precedent_token, token);
+	return testHostForBypass(host, bypass);
+}
+
+bool ProxyParser::testHostForBypass(string host, string bypass)
 {
 	return false;
 }
