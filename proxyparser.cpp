@@ -123,3 +123,8 @@ bool ProxyParser::testHostForBypass(string host, string bypass)
 {
 	return false;
 }
+
+bool ProxyParser::isDomain(string host)
+{
+	return (isalpha(host.at(0)) || host.at(0) == '*');
+}

@@ -20,4 +20,6 @@ public:
 	static void getStaticProxySettingForUrl(string url, wstring proxylist, wstring proxybypass, ProxySetting & proxy);
 	static bool testHostForBypassList(string host, wstring wproxybypass);
 	static bool testHostForBypass(string host, string bypass);
+	static bool isDomain(string host);
+
 };
