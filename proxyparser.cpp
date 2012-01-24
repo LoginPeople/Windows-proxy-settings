@@ -121,10 +121,46 @@ bool ProxyParser::testHostForBypassList(string host, wstring wproxybypass)
 
 bool ProxyParser::testHostForBypass(string host, string bypass)
 {
+	cout << "testing domain \"" << host << "\" for bypass: " << bypass << " ";
+	if(isDomain(host))
+	{
+		bool result = testDomainForBypass(host, bypass);
+		if(result)
+		{
+			cout << " => MATCH" << endl;
+			return true;
+		}
+		else
+		{
+			cout << " => NO MATCH" << endl;
+			return false;
+		}
+	}
+	return false;
+}
+
+bool ProxyParser::testDomainForBypass(string domain, string bypass)
+{
+	if(isDomain(bypass))
+	{
+		if(domain == bypass)
+			return true;
+
+		if(bypass.at(0) == '*')
+		{
+			string suffix = bypass.substr(1, string::npos);
+			size_t found = domain.rfind(suffix);
+			return(found+suffix.length() == domain.length());//the suffix is the end of the domain
+		}
+
+		if(bypass == "<local>" && domain.find('.') == string::npos)
+			return true;
+	}
+
 	return false;
 }
 
 bool ProxyParser::isDomain(string host)
 {
-	return (isalpha(host.at(0)) || host.at(0) == '*');
+	return (isalpha(host.at(0)) || host.at(0) == '*' || host == "<local>");
 }
