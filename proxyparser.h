@@ -1,5 +1,6 @@
 #pragma once
 #include <string>
+#include <vector>
 
 using namespace std;
 
@@ -22,6 +23,7 @@ public:
 	static bool testHostForBypass(string host, string bypass);
 	static bool testDomainForBypass(string domain, string bypass);
 	static bool testIpForBypass(string ip, string bypass);
+	static vector<string> getIPForHost(string host);
 	static bool isDomain(string host);
 
 };

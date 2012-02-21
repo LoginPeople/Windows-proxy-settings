@@ -1,7 +1,10 @@
 #include "proxyparser.h"
+
+#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <Winhttp.h>
-#include <Winsock.h>
+#include <Ws2tcpip.h>
+#include <Winsock2.h>
 #include <iostream>
 
 ProxyParser::ProxyParser(string url)
@@ -137,6 +140,7 @@ bool ProxyParser::testHostForBypass(string host, string bypass)
 			return false;
 		}
 	}
+
 	return false;
 }
 
@@ -156,6 +160,18 @@ bool ProxyParser::testDomainForBypass(string domain, string bypass)
 
 		if(bypass == "<local>" && domain.find('.') == string::npos)
 			return true;
+	}
+	else
+	{
+		vector<string> ips = getIPForHost(domain);
+		vector<string>::iterator ipIt;
+
+		for(ipIt = ips.begin(); ipIt != ips.end(); ipIt++)
+		{
+			string ip = *ipIt;
+			if(testIpForBypass(ip, bypass))
+				return true;
+		}
 	}
 
 	return false;
@@ -202,6 +218,35 @@ bool ProxyParser::testIpForBypass(string ip, string bypass)
 
 	}
 	return false;
+}
+
+vector<string> ProxyParser::getIPForHost(string host)
+{
+	vector<string> ips;
+
+	WSADATA wsaData;
+	int res = WSAStartup(MAKEWORD(2, 2), &wsaData);
+	if(res != 0)
+		return ips;
+
+	struct addrinfo * result;
+	res = getaddrinfo(host.c_str(), NULL, NULL, &result);
+	if(res == 0)
+	{
+		struct addrinfo * current = result;
+		do{
+			struct sockaddr_in  *sockaddr_ipv4 = (struct sockaddr_in *) current->ai_addr;
+			string ip = inet_ntoa(sockaddr_ipv4->sin_addr);
+
+			ips.push_back(ip);
+
+			current = current->ai_next;
+		}while(current != NULL);
+
+		freeaddrinfo(result);
+	}
+	WSACleanup();
+	return ips;
 }
 
 bool ProxyParser::isDomain(string host)
