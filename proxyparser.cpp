@@ -168,6 +168,14 @@ bool ProxyParser::testIpForBypass(string ip, string bypass)
 		if(ip == bypass)
 			return true;
 
+		//special case for IP like 172.16*
+		if(bypass.at(bypass.size()-1) == '*')
+		{
+			if(ip.substr(0, bypass.size()-1) == bypass.substr(0, bypass.size()-1))
+				return true;
+		}
+
+
 		size_t token, iptoken, precedent_token = 0,  precedent_iptoken = 0;
 		token = bypass.find(".");
 		iptoken = ip.find(".");
