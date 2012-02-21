@@ -41,7 +41,6 @@ ProxyParser::ProxyParser(string url)
 				wcout << L"proxy bypass list: " << ieProxyConfig.lpszProxyBypass << endl;
 			else
 				wcout << L"proxy bypass list: NONE" << endl;
-			//cout << "proxy bypass list will be ignored by UCK" << endl;
 		}
 	}
 
@@ -201,7 +200,6 @@ bool ProxyParser::testIpForBypass(string ip, string bypass)
 			string bypassnum = bypass.substr(precedent_token, token-precedent_token);
 			string ipnum = ip.substr(precedent_iptoken, iptoken-precedent_iptoken);
 
-			cout << ipnum << " ?= " << bypassnum << endl;
 			if(!(bypassnum == ipnum || bypassnum == "*"))
 				return false;
 
