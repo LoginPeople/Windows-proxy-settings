@@ -1,6 +1,7 @@
 #include "proxyparser.h"
 #include <windows.h>
 #include <Winhttp.h>
+#include <Winsock.h>
 #include <iostream>
 
 ProxyParser::ProxyParser(string url)
@@ -197,7 +198,7 @@ bool ProxyParser::testIpForBypass(string ip, string bypass)
 
 bool ProxyParser::isDomain(string host)
 {
-	return (isalpha(host.at(0)) 
+	return (isalpha(host.at(0))
 		|| (host.at(0) == '*' && host.at(1) == '.' && isalpha(host.at(2)))
 		|| host == "<local>");
 }

@@ -19,6 +19,8 @@ void HardcodedSettingTestCase::compareHostToBypass()
 
 	CPPUNIT_ASSERT( !ProxyParser::testHostForBypass("www.loginpeople.com", "<local>") );
 	CPPUNIT_ASSERT( ProxyParser::testHostForBypass("loginpeople", "<local>") );
+
+	CPPUNIT_ASSERT( !ProxyParser::testHostForBypass("www.loginpeople.com", "172.16.0.1") );
 }
 
 void HardcodedSettingTestCase::compareIpToBypass()
