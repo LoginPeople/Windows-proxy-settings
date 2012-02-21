@@ -9,6 +9,15 @@
 
 ProxyParser::ProxyParser(string url)
 {
+
+}
+
+ProxyParser::~ProxyParser(void)
+{
+}
+
+void ProxyParser::getProxySettingForUrl(string url, ProxySetting & proxy)
+{
 	WINHTTP_CURRENT_USER_IE_PROXY_CONFIG	ieProxyConfig;
 	WINHTTP_AUTOPROXY_OPTIONS				autoProxyOptions;
 	WINHTTP_PROXY_INFO						autoProxyInfo;	
@@ -70,16 +79,11 @@ ProxyParser::ProxyParser(string url)
 	}
 	else
 	{
-		ProxySetting proxy;
 		getStaticProxySettingForUrl(url, ieProxyConfig.lpszProxy, ieProxyConfig.lpszProxyBypass, proxy);
 	}
 }
 
-ProxyParser::~ProxyParser(void)
-{
-}
-
-void ProxyParser::getStaticProxySettingForUrl(string url, wstring proxylist, wstring proxybypass, ProxySetting & proxy)
+void ProxyParser::getStaticProxySettingForUrl(string url, wstring wproxylist, wstring proxybypass, ProxySetting & proxy)
 {
 	URL_COMPONENTS components = {0};
 	components.dwStructSize = sizeof(URL_COMPONENTS);
@@ -97,7 +101,11 @@ void ProxyParser::getStaticProxySettingForUrl(string url, wstring proxylist, wst
 	wstring whost(domain);
 	string host(whost.begin(), whost.end());
 	//FIXME
-	testHostForBypassList(host, proxybypass);
+	if(!testHostForBypassList(host, proxybypass))
+	{
+		string proxylist(wproxylist.begin(), wproxylist.end());
+		proxy.domain = proxylist;
+	}
 }
 
 bool ProxyParser::testHostForBypassList(string host, wstring wproxybypass)

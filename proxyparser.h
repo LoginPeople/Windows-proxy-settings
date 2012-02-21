@@ -6,6 +6,7 @@ using namespace std;
 
 class ProxySetting
 {
+public:
 	string protocol;
 	string domain;
 	unsigned int port;
@@ -18,6 +19,7 @@ public:
 	ProxyParser(string url);
 	~ProxyParser(void);
 
+	static void getProxySettingForUrl(string url, ProxySetting & proxy);
 	static void getStaticProxySettingForUrl(string url, wstring proxylist, wstring proxybypass, ProxySetting & proxy);
 	static bool testHostForBypassList(string host, wstring wproxybypass);
 	static bool testHostForBypass(string host, string bypass);

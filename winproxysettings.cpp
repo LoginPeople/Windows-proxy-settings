@@ -8,13 +8,21 @@
 #include <cppunit/TextOutputter.h>
 
 #include "hardcodedsettingtest.h"
+#include "proxyparser.h"
 
 using namespace std;
 
 int main(int argc, char * argv[])
 {
-	CppUnit::TextUi::TestRunner runner;
+	if(argc > 1)
+	{
+		ProxySetting proxy;
+		ProxyParser::getProxySettingForUrl(argv[1], proxy);
+		cout << "chosen proxy: " << proxy.protocol << "://" << proxy.domain << ":" << proxy.port << endl;
+		return 0;
+	}
 
+	CppUnit::TextUi::TestRunner runner;
 
 	runner.setOutputter( new CppUnit::TextOutputter( 
                           &runner.result(),
