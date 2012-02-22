@@ -100,53 +100,39 @@ void ProxyParser::getProxySettingForProtocolFromProxyList(string protocol, strin
 	do
 	{
 		string proxyItem = proxyList.substr(precedent_token, token-precedent_token);
-
-		//proxy item strings: ([<scheme>=][<scheme>"://"]<server>[":"<port>])
-		size_t proxyToken = proxyItem.find("=");
-		if(proxyToken == string::npos)
-		{
-			cout << "found matching proxy item for protocol: " << protocol << endl;
-			proxy.protocol = protocol;
-			proxyItem = proxyItem.erase(0, proxyToken+1);
-
-			cout << "remaining proxy item: " <<proxyItem << endl;
-			proxyToken = proxyItem.find("/");
-			if(proxyToken != string::npos)
-				proxyItem = proxyItem.erase(0, proxyToken+2);
-
-			proxyToken = proxyItem.find(":");
-			proxy.domain = proxyItem.substr(0, proxyToken);
-			stringstream s(proxyItem.substr(proxyToken+1, string::npos));
-			s >> proxy.port;
+		getProxySettingForProxyListItem(proxyItem, proxy);
+		cout << "found proxy setting wioth protocol: " << proxy.protocol << endl;
+		if(proxy.protocol== protocol || proxy.protocol == "all")
 			break;
-		}
-		else
-		{
-			string proto = proxyItem.substr(0, proxyToken);
-			if(protocol == proto)
-			{
-				cout << "found matching proxy item for protocol: " << protocol << endl;
-			proxy.protocol = protocol;
-			proxyItem = proxyItem.erase(0, proxyToken+1);
-
-			cout << "remaining proxy item: " <<proxyItem << endl;
-			proxyToken = proxyItem.find("/");
-			if(proxyToken != string::npos)
-				proxyItem = proxyItem.erase(0, proxyToken+2);
-
-			proxyToken = proxyItem.find(":");
-			proxy.domain = proxyItem.substr(0, proxyToken);
-			stringstream s(proxyItem.substr(proxyToken+1, string::npos));
-			s >> proxy.port;
-			break;
-			}
-		}
 
 
 		precedent_token = token+1;
 		token = proxyList.find(";", precedent_token);//can be separated by whitespace too?
 
 	}while(token != string::npos);
+}
+
+void ProxyParser::getProxySettingForProxyListItem(string proxyItem, ProxySetting & proxy)
+{
+	//proxy item strings: ([<scheme>=][<scheme>"://"]<server>[":"<port>])
+	size_t proxyToken = proxyItem.find("=");
+
+	if(proxyToken != string::npos)
+		proxy.protocol = proxyItem.substr(0, proxyToken);
+	else
+		proxy.protocol = "all";
+
+	proxyItem = proxyItem.erase(0, proxyToken+1);
+
+	cout << "remaining proxy item: " <<proxyItem << endl;
+	proxyToken = proxyItem.find("/");
+	if(proxyToken != string::npos)
+		proxyItem = proxyItem.erase(0, proxyToken+2);
+
+	proxyToken = proxyItem.find(":");
+	proxy.domain = proxyItem.substr(0, proxyToken);
+	stringstream s(proxyItem.substr(proxyToken+1, string::npos));
+	s >> proxy.port;
 }
 
 void ProxyParser::getStaticProxySettingForUrl(string url, wstring wproxylist, wstring proxybypass, ProxySetting & proxy)
