@@ -16,8 +16,6 @@ public:
 class ProxyParser
 {
 public:
-	ProxyParser(string url);
-	~ProxyParser(void);
 
 	static bool getProxySettingForUrl(string url, ProxySetting & proxy);
 	static bool getStaticProxySettingForUrl(string url, wstring proxylist, wstring proxybypass, ProxySetting & proxy);

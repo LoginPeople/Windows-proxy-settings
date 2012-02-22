@@ -8,15 +8,6 @@
 #include <iostream>
 #include <sstream>
 
-ProxyParser::ProxyParser(string url)
-{
-
-}
-
-ProxyParser::~ProxyParser(void)
-{
-}
-
 bool ProxyParser::getProxySettingForUrl(string url, ProxySetting & proxy)
 {
 	WINHTTP_CURRENT_USER_IE_PROXY_CONFIG	ieProxyConfig;
