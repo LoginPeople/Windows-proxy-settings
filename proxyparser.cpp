@@ -73,7 +73,10 @@ void ProxyParser::getProxySettingForUrl(string url, ProxySetting & proxy)
 			if (NULL != autoProxyInfo.lpszProxy)
 			{
 				wcout << L"got proxy list: " << autoProxyInfo.lpszProxy << endl;
-				//proxy.domain = autoProxyInfo.lpszProxy;
+				wstring wproxyList(autoProxyInfo.lpszProxy);
+				string proxyList(wproxyList.begin(), wproxyList.end());
+				getProxySettingForProtocolFromProxyList("http", proxyList, proxy);
+
 				GlobalFree( autoProxyInfo.lpszProxy );
 				if(NULL != autoProxyInfo.lpszProxyBypass)
 				{
@@ -100,8 +103,7 @@ void ProxyParser::getProxySettingForProtocolFromProxyList(string protocol, strin
 
 		//proxy item strings: ([<scheme>=][<scheme>"://"]<server>[":"<port>])
 		size_t proxyToken = proxyItem.find("=");
-		string proto = proxyItem.substr(0, proxyToken);
-		if(protocol == proto)
+		if(proxyToken == string::npos)
 		{
 			cout << "found matching proxy item for protocol: " << protocol << endl;
 			proxy.protocol = protocol;
@@ -118,6 +120,28 @@ void ProxyParser::getProxySettingForProtocolFromProxyList(string protocol, strin
 			s >> proxy.port;
 			break;
 		}
+		else
+		{
+			string proto = proxyItem.substr(0, proxyToken);
+			if(protocol == proto)
+			{
+				cout << "found matching proxy item for protocol: " << protocol << endl;
+			proxy.protocol = protocol;
+			proxyItem = proxyItem.erase(0, proxyToken+1);
+
+			cout << "remaining proxy item: " <<proxyItem << endl;
+			proxyToken = proxyItem.find("/");
+			if(proxyToken != string::npos)
+				proxyItem = proxyItem.erase(0, proxyToken+2);
+
+			proxyToken = proxyItem.find(":");
+			proxy.domain = proxyItem.substr(0, proxyToken);
+			stringstream s(proxyItem.substr(proxyToken+1, string::npos));
+			s >> proxy.port;
+			break;
+			}
+		}
+
 
 		precedent_token = token+1;
 		token = proxyList.find(";", precedent_token);//can be separated by whitespace too?
