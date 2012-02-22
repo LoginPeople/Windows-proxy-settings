@@ -19,5 +19,5 @@ Usage
     else
         cout << "no proxy for this URL" << endl;
 
-You need to link to Winhttp.lib and Ws2_32.lib to include this code in your project.
+You need to add proxyparser.cpp and proxyparser.h to your project (the other files are unit tests), and link to Winhttp.lib and Ws2_32.lib.
 
