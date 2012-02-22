@@ -1,4 +1,6 @@
-#pragma once
+#ifndef PROXYPARSER_H
+#define PROXYPARSER_H
+
 #include <string>
 #include <vector>
 
@@ -29,3 +31,5 @@ public:
 	static bool isDomain(string host);
 
 };
+
+#endif
