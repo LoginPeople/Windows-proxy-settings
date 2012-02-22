@@ -5,7 +5,7 @@
 #include <Winhttp.h>
 #include <Ws2tcpip.h>
 #include <Winsock2.h>
-#include <iostream>
+//#include <iostream>
 #include <sstream>
 
 bool ProxyParser::getProxySettingForUrl(string url, ProxySetting & proxy)
@@ -27,28 +27,28 @@ bool ProxyParser::getProxySettingForUrl(string url, ProxySetting & proxy)
 			autoProxyOptions.dwAutoDetectFlags = WINHTTP_AUTO_DETECT_TYPE_DHCP | WINHTTP_AUTO_DETECT_TYPE_DNS_A;
 			autoProxyOptions.fAutoLogonIfChallenged = TRUE;				
 			autoProxy = TRUE;
-			cout << "proxy configured with WPAD" << endl;
+			//cout << "proxy configured with WPAD" << endl;
 		}
 		else if( ieProxyConfig.lpszAutoConfigUrl != NULL ){
 		// Normal PAC file									
 			autoProxyOptions.dwFlags = WINHTTP_AUTOPROXY_CONFIG_URL;
 			autoProxyOptions.lpszAutoConfigUrl = ieProxyConfig.lpszAutoConfigUrl;
 			autoProxy = TRUE;
-			wcout << L"download PAC file from: " << ieProxyConfig.lpszAutoConfigUrl << endl;
+			//wcout << L"download PAC file from: " << ieProxyConfig.lpszAutoConfigUrl << endl;
 		}
 		else if ( ieProxyConfig.lpszProxy != NULL ){
 			autoProxy = FALSE;
-			wcout << L"hardcoded proxy address: "  << ieProxyConfig.lpszProxy << endl;
+			/*wcout << L"hardcoded proxy address: "  << ieProxyConfig.lpszProxy << endl;
 			if(ieProxyConfig.lpszProxyBypass != NULL)
 				wcout << L"proxy bypass list: " << ieProxyConfig.lpszProxyBypass << endl;
 			else
-				wcout << L"proxy bypass list: NONE" << endl;
+				wcout << L"proxy bypass list: NONE" << endl;*/
 		}
 	}
 
 	if(autoProxy)
 	{
-		cout << "testing proxy autoconfiguration for this URL: " << url << endl;
+		//cout << "testing proxy autoconfiguration for this URL: " << url << endl;
 		std::wstring wUrl(url.begin() , url.end());
 		
 		HINTERNET session = WinHttpOpen(0, // no agent string
@@ -58,13 +58,11 @@ bool ProxyParser::getProxySettingForUrl(string url, ProxySetting & proxy)
                           WINHTTP_FLAG_ASYNC);
 
 		autoProxy = WinHttpGetProxyForUrl( session, wUrl.c_str(), &autoProxyOptions, &autoProxyInfo );
-		if (!autoProxy)
-			cout << "WinHttpGetProxyForUrl failed with error: " << GetLastError() << endl;
-		else
+		if (autoProxy)
 		{
 			if (NULL != autoProxyInfo.lpszProxy)
 			{
-				wcout << L"got proxy list: " << autoProxyInfo.lpszProxy << endl;
+				//wcout << L"got proxy list: " << autoProxyInfo.lpszProxy << endl;
 				wstring wproxyList(autoProxyInfo.lpszProxy);
 				string proxyList(wproxyList.begin(), wproxyList.end());
 
@@ -79,12 +77,16 @@ bool ProxyParser::getProxySettingForUrl(string url, ProxySetting & proxy)
 				GlobalFree(autoProxyInfo.lpszProxy);
 				if(NULL != autoProxyInfo.lpszProxyBypass)
 				{
-					wcout << L"and proxy bypass list: " <<  autoProxyInfo.lpszProxyBypass << endl;
+					//wcout << L"and proxy bypass list: " <<  autoProxyInfo.lpszProxyBypass << endl;
 					GlobalFree(autoProxyInfo.lpszProxyBypass);
 				}
 				return result;
 			}
 		}
+		/*else
+		{
+			cout << "WinHttpGetProxyForUrl failed with error: " << GetLastError() << endl;
+		}*/
 	}
 	else
 	{
@@ -110,7 +112,6 @@ void ProxyParser::getProxySettingForProtocolFromProxyList(string protocol, strin
 	{
 		string proxyItem = proxyList.substr(precedent_token, token-precedent_token);
 		getProxySettingForProxyListItem(proxyItem, proxy);
-		cout << "found proxy setting wioth protocol: " << proxy.protocol << endl;
 		if(proxy.protocol== protocol || proxy.protocol == "all")
 			break;
 
@@ -132,7 +133,6 @@ void ProxyParser::getProxySettingForProxyListItem(string proxyItem, ProxySetting
 
 	proxyItem = proxyItem.erase(0, proxyToken+1);
 
-	cout << "remaining proxy item: " <<proxyItem << endl;
 	proxyToken = proxyItem.find("/");
 	if(proxyToken != string::npos)
 		proxyItem = proxyItem.erase(0, proxyToken+2);
@@ -197,11 +197,12 @@ bool ProxyParser::testHostForBypassList(string host, wstring wproxybypass)
 
 bool ProxyParser::testHostForBypass(string host, string bypass)
 {
-	cout << "testing domain \"" << host << "\" for bypass: " << bypass << " ";
+	//cout << "testing domain \"" << host << "\" for bypass: " << bypass << " ";
 	if(isDomain(host))
 	{
 		bool result = testDomainForBypass(host, bypass);
-		if(result)
+		return result;
+		/*if(result)
 		{
 			cout << " => MATCH" << endl;
 			return true;
@@ -210,12 +211,13 @@ bool ProxyParser::testHostForBypass(string host, string bypass)
 		{
 			cout << " => NO MATCH" << endl;
 			return false;
-		}
+		}*/
 	}
 	else
 	{
 		bool result = testIpForBypass(host, bypass);
-		if(result)
+		return result;
+		/*if(result)
 		{
 			cout << " => MATCH" << endl;
 			return true;
@@ -224,7 +226,7 @@ bool ProxyParser::testHostForBypass(string host, string bypass)
 		{
 			cout << " => NO MATCH" << endl;
 			return false;
-		}
+		}*/
 	}
 }
 
