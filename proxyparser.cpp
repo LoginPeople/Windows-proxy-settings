@@ -6,6 +6,7 @@
 #include <Ws2tcpip.h>
 #include <Winsock2.h>
 #include <iostream>
+#include <sstream>
 
 ProxyParser::ProxyParser(string url)
 {
@@ -72,8 +73,13 @@ void ProxyParser::getProxySettingForUrl(string url, ProxySetting & proxy)
 			if (NULL != autoProxyInfo.lpszProxy)
 			{
 				wcout << L"got proxy list: " << autoProxyInfo.lpszProxy << endl;
+				//proxy.domain = autoProxyInfo.lpszProxy;
+				GlobalFree( autoProxyInfo.lpszProxy );
 				if(NULL != autoProxyInfo.lpszProxyBypass)
+				{
 					wcout << L"and proxy bypass list: " <<  autoProxyInfo.lpszProxyBypass << endl;
+					GlobalFree( autoProxyInfo.lpszProxyBypass );
+				}
 			}
 		}
 	}
@@ -81,6 +87,42 @@ void ProxyParser::getProxySettingForUrl(string url, ProxySetting & proxy)
 	{
 		getStaticProxySettingForUrl(url, ieProxyConfig.lpszProxy, ieProxyConfig.lpszProxyBypass, proxy);
 	}
+}
+
+void ProxyParser::getProxySettingForProtocolFromProxyList(string protocol, string proxyList, ProxySetting & proxy)
+{
+	size_t token, precedent_token = 0;
+	token = proxyList.find(";");
+
+	do
+	{
+		string proxyItem = proxyList.substr(precedent_token, token-precedent_token);
+
+		//proxy item strings: ([<scheme>=][<scheme>"://"]<server>[":"<port>])
+		size_t proxyToken = proxyItem.find("=");
+		string proto = proxyItem.substr(0, proxyToken);
+		if(protocol == proto)
+		{
+			cout << "found matching proxy item for protocol: " << protocol << endl;
+			proxy.protocol = protocol;
+			proxyItem = proxyItem.erase(0, proxyToken+1);
+
+			cout << "remaining proxy item: " <<proxyItem << endl;
+			proxyToken = proxyItem.find("/");
+			if(proxyToken != string::npos)
+				proxyItem = proxyItem.erase(0, proxyToken+2);
+
+			proxyToken = proxyItem.find(":");
+			proxy.domain = proxyItem.substr(0, proxyToken);
+			stringstream s(proxyItem.substr(proxyToken+1, string::npos));
+			s >> proxy.port;
+			break;
+		}
+
+		precedent_token = token+1;
+		token = proxyList.find(";", precedent_token);//can be separated by whitespace too?
+
+	}while(token != string::npos);
 }
 
 void ProxyParser::getStaticProxySettingForUrl(string url, wstring wproxylist, wstring proxybypass, ProxySetting & proxy)
@@ -104,7 +146,10 @@ void ProxyParser::getStaticProxySettingForUrl(string url, wstring wproxylist, ws
 	if(!testHostForBypassList(host, proxybypass))
 	{
 		string proxylist(wproxylist.begin(), wproxylist.end());
-		proxy.domain = proxylist;
+		wstring wscheme(scheme);
+		string protocol(wscheme.begin(), wscheme.end());
+		getProxySettingForProtocolFromProxyList(protocol, proxylist, proxy);
+		//proxy.domain = proxylist;
 	}
 }
 
