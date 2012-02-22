@@ -14,6 +14,7 @@ bool ProxyParser::getProxySettingForUrl(string url, ProxySetting & proxy)
 	WINHTTP_AUTOPROXY_OPTIONS				autoProxyOptions;
 	WINHTTP_PROXY_INFO						autoProxyInfo;	
 	BOOL									autoProxy	= FALSE;
+	bool									result = false;
 
 	memset(&ieProxyConfig,0,sizeof(WINHTTP_CURRENT_USER_IE_PROXY_CONFIG));
 	memset(&autoProxyOptions,0,sizeof(WINHTTP_AUTOPROXY_OPTIONS));
@@ -66,7 +67,7 @@ bool ProxyParser::getProxySettingForUrl(string url, ProxySetting & proxy)
 				wcout << L"got proxy list: " << autoProxyInfo.lpszProxy << endl;
 				wstring wproxyList(autoProxyInfo.lpszProxy);
 				string proxyList(wproxyList.begin(), wproxyList.end());
-				bool result;
+
 				if(proxyList.empty())
 					result = false;
 				else
@@ -75,11 +76,11 @@ bool ProxyParser::getProxySettingForUrl(string url, ProxySetting & proxy)
 					result = true;
 				}
 
-				GlobalFree( autoProxyInfo.lpszProxy );
+				GlobalFree(autoProxyInfo.lpszProxy);
 				if(NULL != autoProxyInfo.lpszProxyBypass)
 				{
 					wcout << L"and proxy bypass list: " <<  autoProxyInfo.lpszProxyBypass << endl;
-					GlobalFree( autoProxyInfo.lpszProxyBypass );
+					GlobalFree(autoProxyInfo.lpszProxyBypass);
 				}
 				return result;
 			}
@@ -87,9 +88,17 @@ bool ProxyParser::getProxySettingForUrl(string url, ProxySetting & proxy)
 	}
 	else
 	{
-		return getStaticProxySettingForUrl(url, ieProxyConfig.lpszProxy, ieProxyConfig.lpszProxyBypass, proxy);
+		result = getStaticProxySettingForUrl(url, ieProxyConfig.lpszProxy, ieProxyConfig.lpszProxyBypass, proxy);
 	}
-	return false;
+
+	if(ieProxyConfig.lpszAutoConfigUrl != NULL)
+		GlobalFree( ieProxyConfig.lpszAutoConfigUrl );
+	if(ieProxyConfig.lpszProxy != NULL)
+		GlobalFree( ieProxyConfig.lpszProxy );
+	if(ieProxyConfig.lpszProxyBypass != NULL)
+		GlobalFree( ieProxyConfig.lpszProxyBypass );
+
+	return result;
 }
 
 void ProxyParser::getProxySettingForProtocolFromProxyList(string protocol, string proxyList, ProxySetting & proxy)
