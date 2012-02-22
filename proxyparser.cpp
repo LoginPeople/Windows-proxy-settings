@@ -212,8 +212,20 @@ bool ProxyParser::testHostForBypass(string host, string bypass)
 			return false;
 		}
 	}
-
-	return false;
+	else
+	{
+		bool result = testIpForBypass(host, bypass);
+		if(result)
+		{
+			cout << " => MATCH" << endl;
+			return true;
+		}
+		else
+		{
+			cout << " => NO MATCH" << endl;
+			return false;
+		}
+	}
 }
 
 bool ProxyParser::testDomainForBypass(string domain, string bypass)
