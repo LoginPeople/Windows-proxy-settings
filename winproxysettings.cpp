@@ -17,8 +17,10 @@ int main(int argc, char * argv[])
 	if(argc > 1)
 	{
 		ProxySetting proxy;
-		ProxyParser::getProxySettingForUrl(argv[1], proxy);
-		cout << "chosen proxy: " << proxy.protocol << "://" << proxy.domain << ":" << proxy.port << endl;
+		if(ProxyParser::getProxySettingForUrl(argv[1], proxy))
+			cout << "chosen proxy: protocol=" << proxy.protocol << " domain=" << proxy.domain << " port=" << proxy.port << endl;
+		else
+			cout << "no proxy for this URL" << endl;
 		return 0;
 	}
 

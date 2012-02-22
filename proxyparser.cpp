@@ -17,7 +17,7 @@ ProxyParser::~ProxyParser(void)
 {
 }
 
-void ProxyParser::getProxySettingForUrl(string url, ProxySetting & proxy)
+bool ProxyParser::getProxySettingForUrl(string url, ProxySetting & proxy)
 {
 	WINHTTP_CURRENT_USER_IE_PROXY_CONFIG	ieProxyConfig;
 	WINHTTP_AUTOPROXY_OPTIONS				autoProxyOptions;
@@ -75,7 +75,14 @@ void ProxyParser::getProxySettingForUrl(string url, ProxySetting & proxy)
 				wcout << L"got proxy list: " << autoProxyInfo.lpszProxy << endl;
 				wstring wproxyList(autoProxyInfo.lpszProxy);
 				string proxyList(wproxyList.begin(), wproxyList.end());
-				getProxySettingForProtocolFromProxyList("http", proxyList, proxy);
+				bool result;
+				if(proxyList.empty())
+					result = false;
+				else
+				{
+					getProxySettingForProtocolFromProxyList("http", proxyList, proxy);
+					result = true;
+				}
 
 				GlobalFree( autoProxyInfo.lpszProxy );
 				if(NULL != autoProxyInfo.lpszProxyBypass)
@@ -83,13 +90,15 @@ void ProxyParser::getProxySettingForUrl(string url, ProxySetting & proxy)
 					wcout << L"and proxy bypass list: " <<  autoProxyInfo.lpszProxyBypass << endl;
 					GlobalFree( autoProxyInfo.lpszProxyBypass );
 				}
+				return result;
 			}
 		}
 	}
 	else
 	{
-		getStaticProxySettingForUrl(url, ieProxyConfig.lpszProxy, ieProxyConfig.lpszProxyBypass, proxy);
+		return getStaticProxySettingForUrl(url, ieProxyConfig.lpszProxy, ieProxyConfig.lpszProxyBypass, proxy);
 	}
+	return false;
 }
 
 void ProxyParser::getProxySettingForProtocolFromProxyList(string protocol, string proxyList, ProxySetting & proxy)
@@ -104,7 +113,6 @@ void ProxyParser::getProxySettingForProtocolFromProxyList(string protocol, strin
 		cout << "found proxy setting wioth protocol: " << proxy.protocol << endl;
 		if(proxy.protocol== protocol || proxy.protocol == "all")
 			break;
-
 
 		precedent_token = token+1;
 		token = proxyList.find(";", precedent_token);//can be separated by whitespace too?
@@ -135,7 +143,7 @@ void ProxyParser::getProxySettingForProxyListItem(string proxyItem, ProxySetting
 	s >> proxy.port;
 }
 
-void ProxyParser::getStaticProxySettingForUrl(string url, wstring wproxylist, wstring proxybypass, ProxySetting & proxy)
+bool ProxyParser::getStaticProxySettingForUrl(string url, wstring wproxylist, wstring proxybypass, ProxySetting & proxy)
 {
 	URL_COMPONENTS components = {0};
 	components.dwStructSize = sizeof(URL_COMPONENTS);
@@ -159,8 +167,10 @@ void ProxyParser::getStaticProxySettingForUrl(string url, wstring wproxylist, ws
 		wstring wscheme(scheme);
 		string protocol(wscheme.begin(), wscheme.end());
 		getProxySettingForProtocolFromProxyList(protocol, proxylist, proxy);
-		//proxy.domain = proxylist;
+		return true;
 	}
+	else
+		return false;
 }
 
 bool ProxyParser::testHostForBypassList(string host, wstring wproxybypass)

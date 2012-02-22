@@ -19,8 +19,8 @@ public:
 	ProxyParser(string url);
 	~ProxyParser(void);
 
-	static void getProxySettingForUrl(string url, ProxySetting & proxy);
-	static void getStaticProxySettingForUrl(string url, wstring proxylist, wstring proxybypass, ProxySetting & proxy);
+	static bool getProxySettingForUrl(string url, ProxySetting & proxy);
+	static bool getStaticProxySettingForUrl(string url, wstring proxylist, wstring proxybypass, ProxySetting & proxy);
 	static void getProxySettingForProtocolFromProxyList(string protocol, string proxyList, ProxySetting & proxy);
 	static void getProxySettingForProxyListItem(string proxyItem, ProxySetting & proxy);
 	static bool testHostForBypassList(string host, wstring wproxybypass);
