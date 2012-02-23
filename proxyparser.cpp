@@ -90,7 +90,14 @@ bool ProxyParser::getProxySettingForUrl(string url, ProxySetting & proxy)
 	}
 	else
 	{
-		result = getStaticProxySettingForUrl(url, ieProxyConfig.lpszProxy, ieProxyConfig.lpszProxyBypass, proxy);
+		if(ieProxyConfig.lpszProxy != NULL)
+		{
+			wstring bypassList;
+			if(ieProxyConfig.lpszProxyBypass != NULL)
+				bypassList = ieProxyConfig.lpszProxyBypass;
+
+			result = getStaticProxySettingForUrl(url, ieProxyConfig.lpszProxy, bypassList, proxy);
+		}
 	}
 
 	if(ieProxyConfig.lpszAutoConfigUrl != NULL)
@@ -175,6 +182,8 @@ bool ProxyParser::getStaticProxySettingForUrl(string url, wstring wproxylist, ws
 
 bool ProxyParser::testHostForBypassList(string host, wstring wproxybypass)
 {
+	if(wproxybypass.empty())
+		return false;
 	string proxybypass(wproxybypass.begin(), wproxybypass.end());
 	size_t token, precedent_token = 0;
 	token = proxybypass.find(";");
